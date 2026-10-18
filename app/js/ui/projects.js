@@ -8,7 +8,7 @@ import { PRIORITIES } from '../core/model.js';
 import { TaskList } from './tasks.js';
 import { QuickAdd } from './home.js';
 
-const COLORS = ['#2f6f8f', '#7a4f9a', '#2f8f5b', '#3b6fc4', '#b5672c', '#8f2f4a', '#5b6b7a', '#9a8a2f'];
+const COLORS = ['#0891b2', '#9333ea', '#16a34a', '#2563eb', '#ea580c', '#e11d48', '#db2777', '#ca8a04', '#0d9488', '#5b6b7a'];
 
 function ProjectEditor({ project, onClose }) {
   const [f, setF] = useState({

@@ -1,7 +1,7 @@
 // Service worker: keeps the app working offline. Bump VERSION on every release so
 // phones pick up the new files. Only the app's own files are cached; task data
 // lives in IndexedDB and is never sent anywhere by this worker.
-const VERSION = 'ppm-v1.0.0';
+const VERSION = 'ppm-v1.1.0';
 const FILES = [
   './',
   './index.html',

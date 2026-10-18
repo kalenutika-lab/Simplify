@@ -64,6 +64,11 @@ export const liveProjects = () => state.projects.filter((p) => !p.deleted).sort(
 export const findTask = (id) => state.tasks.find((t) => t.id === id && !t.deleted);
 export const findProject = (id) => state.projects.find((p) => p.id === id && !p.deleted);
 
+const OLD_SEED_COLORS = {
+  '#2f6f8f': '#0891b2', '#7a4f9a': '#9333ea', '#2f8f5b': '#16a34a',
+  '#3b6fc4': '#2563eb', '#b5672c': '#ea580c', '#8f2f4a': '#e11d48',
+};
+
 export async function init() {
   try {
     const browserLang = (globalThis.navigator && navigator.language) || 'en';
@@ -82,6 +87,17 @@ export async function init() {
       await db.setKV('seeded', true);
       await db.setKV('device', state.device);
       state.projects = [...state.projects, ...add];
+    }
+    // v1.1: brighten the default project colours, but only where the user kept the original colour.
+    const recolor = [];
+    for (const p of state.projects) {
+      const c = OLD_SEED_COLORS[p.color];
+      if (c && p.id.startsWith('proj_default_')) recolor.push({ ...p, color: c, updatedAt: nowISO() });
+    }
+    if (recolor.length) {
+      await db.putMany('projects', recolor);
+      const byId = new Map(recolor.map((p) => [p.id, p]));
+      state.projects = state.projects.map((p) => byId.get(p.id) || p);
     }
     if (globalThis.navigator && navigator.storage && navigator.storage.persist) {
       try {

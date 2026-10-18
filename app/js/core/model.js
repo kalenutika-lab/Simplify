@@ -60,12 +60,12 @@ export function defaultDevice(lang) {
 }
 
 const SEED = [
-  { key: 'case', en: 'Case Study', fr: 'Étude de cas', mandatory: true, boost: 10, priority: 'high', color: '#2f6f8f' },
-  { key: 'apps', en: 'Applications / Candidatures', fr: 'Candidatures / Applications', mandatory: true, boost: 10, priority: 'high', color: '#7a4f9a' },
-  { key: 'ai', en: 'AI Startup', fr: 'Startup IA', mandatory: false, boost: 0, priority: 'medium', color: '#2f8f5b' },
-  { key: 'linkedin', en: 'LinkedIn Networking / Connections', fr: 'Réseau LinkedIn / Connexions', mandatory: false, boost: 0, priority: 'medium', color: '#3b6fc4' },
-  { key: 'skema', en: 'SKEMA Assignments', fr: 'Devoirs SKEMA', mandatory: false, boost: 0, priority: 'medium', color: '#b5672c' },
-  { key: 'mck', en: 'McKinsey Forward Program', fr: 'Programme McKinsey Forward', mandatory: false, boost: 0, priority: 'medium', color: '#8f2f4a' },
+  { key: 'case', en: 'Case Study', fr: 'Étude de cas', mandatory: true, boost: 10, priority: 'high', color: '#0891b2' },
+  { key: 'apps', en: 'Applications / Candidatures', fr: 'Candidatures / Applications', mandatory: true, boost: 10, priority: 'high', color: '#9333ea' },
+  { key: 'ai', en: 'AI Startup', fr: 'Startup IA', mandatory: false, boost: 0, priority: 'medium', color: '#16a34a' },
+  { key: 'linkedin', en: 'LinkedIn Networking / Connections', fr: 'Réseau LinkedIn / Connexions', mandatory: false, boost: 0, priority: 'medium', color: '#2563eb' },
+  { key: 'skema', en: 'SKEMA Assignments', fr: 'Devoirs SKEMA', mandatory: false, boost: 0, priority: 'medium', color: '#ea580c' },
+  { key: 'mck', en: 'McKinsey Forward Program', fr: 'Programme McKinsey Forward', mandatory: false, boost: 0, priority: 'medium', color: '#e11d48' },
 ];
 
 export function seedProjects(lang = 'en', now = new Date()) {
