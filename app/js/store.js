@@ -66,7 +66,7 @@ export const findProject = (id) => state.projects.find((p) => p.id === id && !p.
 
 const OLD_SEED_COLORS = {
   '#2f6f8f': '#0891b2', '#7a4f9a': '#9333ea', '#2f8f5b': '#16a34a',
-  '#3b6fc4': '#2563eb', '#b5672c': '#ea580c', '#8f2f4a': '#e11d48',
+  '#3b6fc4': '#2563eb', '#b5672c': '#db2777', '#ea580c': '#db2777', '#8f2f4a': '#e11d48',
 };
 
 export async function init() {
@@ -88,7 +88,7 @@ export async function init() {
       await db.setKV('device', state.device);
       state.projects = [...state.projects, ...add];
     }
-    // v1.1: brighten the default project colours, but only where the user kept the original colour.
+    // v1.1/1.2: brighten the default project colours, but only where the user kept the original colour.
     const recolor = [];
     for (const p of state.projects) {
       const c = OLD_SEED_COLORS[p.color];

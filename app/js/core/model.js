@@ -64,7 +64,7 @@ const SEED = [
   { key: 'apps', en: 'Applications / Candidatures', fr: 'Candidatures / Applications', mandatory: true, boost: 10, priority: 'high', color: '#9333ea' },
   { key: 'ai', en: 'AI Startup', fr: 'Startup IA', mandatory: false, boost: 0, priority: 'medium', color: '#16a34a' },
   { key: 'linkedin', en: 'LinkedIn Networking / Connections', fr: 'Réseau LinkedIn / Connexions', mandatory: false, boost: 0, priority: 'medium', color: '#2563eb' },
-  { key: 'skema', en: 'SKEMA Assignments', fr: 'Devoirs SKEMA', mandatory: false, boost: 0, priority: 'medium', color: '#ea580c' },
+  { key: 'skema', en: 'SKEMA Assignments', fr: 'Devoirs SKEMA', mandatory: false, boost: 0, priority: 'medium', color: '#db2777' },
   { key: 'mck', en: 'McKinsey Forward Program', fr: 'Programme McKinsey Forward', mandatory: false, boost: 0, priority: 'medium', color: '#e11d48' },
 ];
 
