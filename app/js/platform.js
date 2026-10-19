@@ -1,5 +1,5 @@
 // Browser integration: service worker (offline + updates), install prompt, notifications.
-export const APP_VERSION = '1.4.1';
+export const APP_VERSION = '1.4.2';
 
 let deferredPrompt = null;
 let updateCallback = null;
@@ -36,6 +36,12 @@ export function initPlatform({ onOpenTask } = {}) {
   const hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (reloading || !hadController) return;
+    // A new version took over. Reload now, unless a task or dialog is open: then offer "Reload".
+    if (document.querySelector('.sheet, .dialog')) {
+      waitingWorker = null;
+      if (updateCallback) updateCallback();
+      return;
+    }
     reloading = true;
     location.reload();
   });

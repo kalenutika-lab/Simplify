@@ -1,7 +1,7 @@
 // Service worker: keeps the app working offline. Bump VERSION on every release so
 // phones pick up the new files. Only the app's own files are cached; task data
 // lives in IndexedDB and is never sent anywhere by this worker.
-const VERSION = 'ppm-v1.4.1';
+const VERSION = 'ppm-v1.4.2';
 const FILES = [
   './',
   './index.html',
@@ -41,7 +41,8 @@ const FILES = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' })))));
+  // Take over as soon as the new files are cached, so an update never gets stuck waiting.
+  event.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
