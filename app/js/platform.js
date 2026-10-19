@@ -1,5 +1,5 @@
 // Browser integration: service worker (offline + updates), install prompt, notifications.
-export const APP_VERSION = '1.4.0';
+export const APP_VERSION = '1.4.1';
 
 let deferredPrompt = null;
 let updateCallback = null;

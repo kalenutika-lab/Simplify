@@ -94,6 +94,9 @@ function Notifications() {
   <//>`;
 }
 
+// GitHub's "new classic token" page, pre-filled with a name and only the gist permission.
+const TOKEN_URL = 'https://github.com/settings/tokens/new?scopes=gist&description=Project%20manager%20sync';
+
 function syncError(e) {
   toast(t(`se_${e.code || e.message || 'unknown'}`, { detail: e.detail || '' }), { kind: 'error', timeout: 8000 });
 }
@@ -191,6 +194,7 @@ function Sync() {
       <${PairJoin} />
       ${!state.pairCode && html`<details open=${first} onToggle=${(e) => setFirst(e.target.open)}><summary>${t('syncFirstDevice')}</summary>
         <ol>${t('syncStepList').map((x) => html`<li>${x}</li>`)}</ol>
+        <a class="btn primary" href=${TOKEN_URL} target="_blank" rel="noopener">${t('syncMakeToken')}</a>
         <div class="field"><label for="s-token">${t('syncToken')}</label><input id="s-token" type=${show ? 'text' : 'password'} autocomplete="off" value=${token} onInput=${(e) => setToken(e.target.value)} /></div>
         <div class="field"><label for="s-pass">${t('syncPass')}</label><input id="s-pass" type=${show ? 'text' : 'password'} autocomplete="new-password" value=${pass} onInput=${(e) => setPass(e.target.value)} /></div>
         <label class="check-row"><input type="checkbox" checked=${show} onChange=${(e) => setShow(e.target.checked)} /> ${t('syncShow')}</label>

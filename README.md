@@ -44,10 +44,9 @@ On a computer, Chrome and Edge show an install icon in the address bar. You can 
 Sync uses a **secret GitHub Gist** on your own account. Before anything leaves your device, the app encrypts it with a passphrase only you know (AES-256). GitHub only ever stores unreadable data.
 
 **On your computer (once):**
-1. Go to **github.com > Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**.
-2. Name it "Project manager sync" and pick an expiry (one year at most). Under **Account permissions**, set **Gists** to **Read and write**. Leave everything else as it is, then generate the token and copy it.
-   - If that option doesn't appear, create a **classic token** with only the **gist** scope ticked.
-3. In the app, open **Settings > Sync between devices > First device**. Paste the token, choose a passphrase (8 characters or more) and tap **Turn on sync**.
+1. In the app, open **Settings > Sync between devices > First device** and tap **Create my GitHub key**. GitHub opens a "new token" page already filled in with a name and only the **gist** permission.
+2. Choose an expiration (for example 1 year), scroll down and press **Generate token**. Copy the code that starts with `ghp_`.
+3. Back in the app, paste it, choose a passphrase (8 characters or more) and tap **Turn on sync**.
 4. A QR code appears (later you can show it again with **Connect another device**).
 
 **On your phone:**
