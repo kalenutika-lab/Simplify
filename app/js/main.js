@@ -11,6 +11,7 @@ import { Progress } from './ui/progress.js';
 import { Settings } from './ui/settings.js';
 import { initPlatform, onUpdateReady, applyUpdate, showSystemNotification } from './platform.js';
 import { fmtStamp } from './ui/common.js';
+import { extractPairCode } from './core/pair.js';
 
 const icon = (d) => html`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d.map((x) => html`<path d=${x} />`)}</svg>`;
 const TABS = [
@@ -20,6 +21,14 @@ const TABS = [
   { id: 'progress', icon: ['M4 20V10', 'M10 20V4', 'M16 20v-7', 'M22 20H2'], view: Progress },
   { id: 'settings', icon: ['M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M19 12h2M3 12h2M12 3v2M12 19v2M17 7l1.5-1.5M5.5 18.5L7 17M17 17l1.5 1.5M5.5 5.5L7 7'], view: Settings },
 ];
+
+// A pairing link from another device opens Settings with the code ready to use.
+function takePairCode() {
+  if (!location.hash.startsWith('#pair=')) return;
+  state.pairCode = extractPairCode(location.hash);
+  history.replaceState(null, '', '#settings');
+}
+takePairCode();
 
 const tabFromHash = () => {
   const h = location.hash.replace('#', '');
@@ -68,7 +77,7 @@ function App() {
     return off;
   }, []);
   useEffect(() => {
-    const onHash = () => setTab(tabFromHash());
+    const onHash = () => { takePairCode(); setTab(tabFromHash()); };
     window.addEventListener('hashchange', onHash);
     onUpdateReady(() => setUpdate(true));
     return () => window.removeEventListener('hashchange', onHash);

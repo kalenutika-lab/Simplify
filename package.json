@@ -1,6 +1,6 @@
 {
   "name": "personal-project-manager",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "description": "Local-first personal project manager (installable web app).",
   "type": "module",

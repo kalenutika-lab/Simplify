@@ -327,3 +327,10 @@ legend { padding: 0 6px; font-weight: 600; font-size: 0.92rem; }
 .tile { background: color-mix(in srgb, var(--ac) 12%, var(--surface)); border-color: color-mix(in srgb, var(--ac) 35%, transparent); }
 .tile strong { color: var(--ac); font-size: 1.9rem; }
 .tile.danger { --ac: var(--danger); }
+
+/* Device pairing */
+.pair ol { padding-left: 20px; }
+.qr { width: min(260px, 100%); margin: 8px 0 10px; background: #fff; border-radius: 16px; padding: 6px; }
+.qr svg { display: block; width: 100%; height: auto; }
+.pair h3 { margin-top: 0; }
+.pair-link { font-size: 0.8rem; margin-bottom: 8px; }

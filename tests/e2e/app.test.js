@@ -325,3 +325,69 @@ test('language switch to French, progress figures and projects', async () => {
   assert.match(await page.locator('.top3').innerText(), /Top 3 du jour/);
   await context.close();
 });
+
+test('sync pairing: second device joins with a code and the passphrase only', async () => {
+  // In-memory stand-in for the GitHub Gist API, shared by both devices.
+  const gists = new Map();
+  let n = 0;
+  async function fakeGitHub(route) {
+    const req = route.request();
+    const url = new URL(req.url());
+    if (req.headers().authorization !== 'Bearer test-token-123') return route.fulfill({ status: 401, body: '{}' });
+    const json = (status, body) => route.fulfill({ status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) });
+    if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' } });
+    const view = (id) => { const g = gists.get(id); return { id, files: { 'ppm-sync.json': { content: g.content, truncated: false } }, history: [{ version: String(g.v) }], updated_at: String(g.v) }; };
+    if (url.pathname === '/gists' && req.method() === 'GET') return json(200, [...gists.keys()].map(view));
+    if (url.pathname === '/gists' && req.method() === 'POST') {
+      const id = `g${++n}`;
+      gists.set(id, { content: JSON.parse(req.postData()).files['ppm-sync.json'].content, v: 1 });
+      return json(201, view(id));
+    }
+    const id = url.pathname.split('/')[2];
+    if (!gists.has(id)) return json(404, {});
+    if (req.method() === 'PATCH') {
+      const g = gists.get(id);
+      gists.set(id, { content: JSON.parse(req.postData()).files['ppm-sync.json'].content, v: g.v + 1 });
+    }
+    return json(200, view(id));
+  }
+
+  const pc = await openApp(env, { width: 1280, height: 900, time: null });
+  await pc.context.route('https://api.github.com/**', fakeGitHub);
+  await quickAdd(pc.page, 'Task from computer');
+  await pc.page.click('a[href="#settings"]');
+  await pc.page.click('summary:has-text("First device")');
+  await pc.page.fill('#s-token', 'test-token-123');
+  await pc.page.fill('#s-pass', 'my secret phrase');
+  await pc.page.click('button:has-text("Turn on sync")');
+  await pc.page.waitForSelector('.qr svg');
+  const link = await pc.page.inputValue('.pair-link');
+  assert.ok(!link.includes('test-token-123'), 'token is not readable in the link');
+
+  const phone = await openApp(env, { time: null });
+  await phone.context.route('https://api.github.com/**', fakeGitHub);
+  await phone.page.goto(link.replace(/^https?:\/\/[^/]+\//, env.url));
+  await phone.page.waitForSelector('#s-pairpass');
+  assert.equal(new URL(phone.page.url()).hash, '#settings');
+  await phone.page.fill('#s-pairpass', 'wrong phrase!');
+  await phone.page.click('button:has-text("Connect")');
+  await phone.page.waitForSelector('.toast.error');
+  await phone.page.fill('#s-pairpass', 'my secret phrase');
+  await phone.page.click('button:has-text("Connect")');
+  await phone.page.waitForSelector('text=This device is now in sync.');
+  await phone.page.click('a[href="#home"]');
+  assert.ok((await titles(phone.page.locator('.top3'))).includes('Task from computer'));
+
+  await quickAdd(phone.page, 'Task from phone');
+  await phone.page.click('a[href="#settings"]');
+  await phone.page.click('button:has-text("Sync now")');
+  await phone.page.waitForSelector('text=Sync complete.');
+  await pc.page.waitForSelector('text=Sync complete.', { state: 'detached' }); // earlier toast gone
+  await pc.page.click('button:has-text("Sync now")');
+  await pc.page.waitForSelector('text=Sync complete.');
+  await pc.page.click('a[href="#home"]');
+  assert.deepEqual((await titles(pc.page.locator('.top3'))).sort(), ['Task from computer', 'Task from phone']);
+  assert.deepEqual(pc.errors.filter((e) => !/401/.test(e)), []);
+  await pc.context.close();
+  await phone.context.close();
+});

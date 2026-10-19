@@ -43,11 +43,18 @@ On a computer, Chrome and Edge show an install icon in the address bar. You can 
 
 Sync uses a **secret GitHub Gist** on your own account. Before anything leaves your device, the app encrypts it with a passphrase only you know (AES-256). GitHub only ever stores unreadable data.
 
-1. On your computer, go to **github.com > Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**.
+**On your computer (once):**
+1. Go to **github.com > Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**.
 2. Name it "Project manager sync" and pick an expiry (one year at most). Under **Account permissions**, set **Gists** to **Read and write**. Leave everything else as it is, then generate the token and copy it.
    - If that option doesn't appear, create a **classic token** with only the **gist** scope ticked.
-3. In the app, open **Settings > Sync between devices**. Paste the token, choose a passphrase (8 characters or more) and tap **Turn on sync**.
-4. Do the same on your other device with the **same token and passphrase**.
+3. In the app, open **Settings > Sync between devices > First device**. Paste the token, choose a passphrase (8 characters or more) and tap **Turn on sync**.
+4. A QR code appears (later you can show it again with **Connect another device**).
+
+**On your phone:**
+5. Open the phone's camera, point it at the QR code and tap the link. The app opens at Settings.
+6. Type the **same passphrase** and tap **Connect**. Your tasks appear.
+
+The QR code holds your token locked with your passphrase, so it is useless to anyone who doesn't know the passphrase. You can also use **Copy link** and send the link to yourself instead of scanning.
 
 The app syncs when it opens, a few seconds after each change, when you come back online, and whenever you tap **Sync now**. If the same task was edited on both devices, the latest edit wins. Deleted items are deleted on both devices.
 

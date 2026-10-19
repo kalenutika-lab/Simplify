@@ -1,5 +1,6 @@
 // App state, persistence and actions. Every change is written to IndexedDB right away.
 import * as db from './db.js';
+import { readPairCode } from './core/pair.js';
 import { makeTask, makeProject, makeReminder, seedProjects, defaultPrefs, defaultDevice, nowISO, newId } from './core/model.js';
 import { validateTask, validateProject, validatePrefs, planImport, buildExport } from './core/validate.js';
 import { dueReminders, snoozeUntil } from './core/reminders.js';
@@ -19,6 +20,7 @@ export const state = {
   alerts: [],
   toasts: [],
   sync: { running: false },
+  pairCode: null,
   persisted: null,
 };
 
@@ -301,6 +303,14 @@ export async function setPrefs(patch) {
   state.prefs = { ...state.prefs, ...patch, updatedAt: nowISO() };
   emit();
   if (await persist(() => db.setKV('prefs', state.prefs))) scheduleSync();
+}
+
+/** Turn on sync on this device from another device's pairing code and the shared passphrase. */
+export async function connectWithPairCode(code, passphrase) {
+  const token = await readPairCode(code, passphrase);
+  state.pairCode = null;
+  await setDevice({ sync: { enabled: true, token, passphrase, gistId: '', lastError: null } });
+  return syncNow({ manual: true });
 }
 
 export async function setDevice(patch) {

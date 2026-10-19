@@ -8,6 +8,8 @@ import { planImport, buildExport, validateTask, validateProject, validatePrefs }
 import { mergeRecords, mergePrefs } from '../../app/js/core/merge.js';
 import { encryptJSON, decryptJSON } from '../../app/js/core/crypto.js';
 import { syncOnce, SYNC_FILE } from '../../app/js/core/sync.js';
+import { makePairCode, readPairCode, pairLink, extractPairCode } from '../../app/js/core/pair.js';
+import qrcode from '../../app/js/vendor/qrcode.js';
 import { makeTask, seedProjects, defaultPrefs } from '../../app/js/core/model.js';
 
 const NOW = new Date(2026, 9, 17, 10, 0); // Saturday
@@ -273,4 +275,22 @@ test('service worker caches every app file', () => {
   const needed = files.filter((f) => /\.(js|css|html|webmanifest|png|svg)$/.test(f) && f !== 'sw.js' && f !== 'icons/maskable.svg');
   const missing = needed.filter((f) => !sw.includes(`'./${f}'`));
   assert.deepEqual(missing, []);
+});
+
+test('pairing link: carries the token encrypted, needs the passphrase, fits in a QR code', async () => {
+  const token = 'github_pat_11ABCDEFG0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ab';
+  const code = await makePairCode(token, 'correct horse');
+  assert.ok(!code.includes('github_pat'), 'token must not appear in clear');
+  const link = pairLink('https://kalenutika-lab.github.io/Simplify/#settings', code);
+  assert.equal(link, `https://kalenutika-lab.github.io/Simplify/#pair=${code}`);
+  assert.equal(extractPairCode(link), code);
+  assert.equal(extractPairCode(`#pair=${code}`), code);
+  assert.equal(extractPairCode('hello'), null);
+  assert.equal(await readPairCode(code, 'correct horse'), token);
+  await assert.rejects(readPairCode(code, 'wrong horse'), /wrongPassphrase/);
+  await assert.rejects(readPairCode('A'.repeat(60), 'correct horse'), /badPairCode/);
+  const qr = qrcode(0, 'L');
+  qr.addData(link);
+  qr.make();
+  assert.ok(qr.getModuleCount() <= 117, 'QR code stays scannable on a phone screen');
 });
