@@ -221,3 +221,25 @@ test('calendar export: ics and Google Calendar link', () => {
   assert.match(allDay, /TRIGGER:PT480M/); // 60 min before 09:00 = 08:00 = 480 min after midnight
   assert.equal(buildICS(T({}), { now: NOW }), null);
 });
+
+test('Android reminder plan: soonest upcoming reminders, stable ids, skips done/past/fired', async () => {
+  const { planNotifications, notificationId } = await import('../../app/js/core/notifyplan.js');
+  const { makeTask, makeReminder } = await import('../../app/js/core/model.js');
+  const now = new Date(2026, 9, 20, 10, 0);
+  const a = makeTask({ title: 'A', dueDate: '2026-10-21', dueTime: '18:00' });
+  a.reminders = [makeReminder({ kind: 'before', minutes: 60 }), makeReminder({ kind: 'before', minutes: 2 * 1440 })];
+  const b = makeTask({ title: 'B', dueDate: '2026-10-20', dueTime: '12:00', done: true });
+  b.reminders = [makeReminder({ kind: 'before', minutes: 30 })];
+  const c = makeTask({ title: 'C' });
+  c.reminders = [makeReminder({ kind: 'at', at: '2026-10-20T11:00' })];
+  const plan = planNotifications([a, b, c], now);
+  assert.deepEqual(plan.map((x) => x.title), ['C', 'A']); // A's 2-days-before is already past
+  assert.equal(plan[1].at.getTime(), new Date(2026, 9, 21, 17, 0).getTime());
+  assert.equal(planNotifications([a, b, c], now)[0].id, plan[0].id);
+  assert.ok(plan.every((x) => Number.isInteger(x.id) && x.id > 0 && x.id < 2 ** 31));
+  c.reminders[0].firedFor = '2026-10-20T11:00';
+  assert.deepEqual(planNotifications([a, c], now).map((x) => x.title), ['A']);
+  assert.notEqual(notificationId('x|y|1'), notificationId('x|y|2'));
+  const many = Array.from({ length: 80 }, (_, i) => { const t = makeTask({ title: `T${i}` }); t.reminders = [makeReminder({ kind: 'at', at: `2026-11-${String(1 + (i % 28)).padStart(2, '0')}T09:00` })]; return t; });
+  assert.equal(planNotifications(many, now).length, 60);
+});

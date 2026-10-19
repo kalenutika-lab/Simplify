@@ -6,7 +6,9 @@ import { makePairCode, pairLink, extractPairCode } from '../core/pair.js';
 import qrcode from '../vendor/qrcode.js';
 import { DEFAULT_WEIGHTS, PRIORITIES } from '../core/model.js';
 import { todayYMD } from '../core/dates.js';
-import { APP_VERSION, installState, promptInstall, showSystemNotification } from '../platform.js';
+import { APP_VERSION, ANDROID_APK_URL, WEB_APP_URL, installState, promptInstall, showSystemNotification } from '../platform.js';
+import { isNative, notificationPermission, requestNotificationPermission, rescheduleAll } from '../native.js';
+import { useEffect } from './common.js';
 
 function NumberInput({ id, value, onCommit, min = 0, max = 100000, step = 1, scale = 1 }) {
   const [text, setText] = useState(String(+(value / scale).toFixed(2)));
@@ -67,6 +69,30 @@ function Scoring() {
   <//>`;
 }
 
+/** Android app: reminders are scheduled on the phone itself. */
+function NativeNotifications() {
+  const [perm, setPerm] = useState('…');
+  useEffect(() => { notificationPermission().then(setPerm).catch(() => setPerm('denied')); }, []);
+  async function allow() {
+    setPerm(await requestNotificationPermission().catch(() => 'denied'));
+    rescheduleAll(state.tasks);
+  }
+  return html`
+    ${perm === 'granted' && html`<p class="notice">🔔 ${t('nativeNotifOn')}</p>`}
+    ${perm === 'prompt' && html`<p>${t('nativeNotifAsk')}</p><button class="btn primary" onClick=${allow}>${t('nativeNotifAllow')}</button>`}
+    ${perm === 'denied' && html`<p class="warn-text">${t('nativeNotifDenied')}</p>`}`;
+}
+
+/** Web version: offer the Android app for reminders that ring when the app is closed. */
+function GetAndroidApp() {
+  return html`<div class="notice">
+    <strong>${t('androidTitle')}</strong>
+    <p>${t('androidIntro')}</p>
+    <ol>${t('androidSteps').map((x) => html`<li>${x}</li>`)}</ol>
+    <a class="btn primary" href=${ANDROID_APK_URL} rel="noopener">${t('androidDownload')}</a>
+  </div>`;
+}
+
 function Notifications() {
   const supported = 'Notification' in globalThis;
   const perm = supported ? Notification.permission : 'unsupported';
@@ -80,8 +106,8 @@ function Notifications() {
   }
   const dr = state.prefs.defaultReminderMinutes;
   return html`<${Section} title=${t('notifSection')}>
-    <p class="hint">${t('notifLimits')}</p>
-    ${!supported ? html`<p class="warn-text">${t('notifUnsupported')}</p>` : html`
+    ${isNative ? html`<${NativeNotifications} />` : html`<p class="hint">${t('notifLimits')}</p><${GetAndroidApp} />`}
+    ${isNative ? null : !supported ? html`<p class="warn-text">${t('notifUnsupported')}</p>` : html`
       <label class="check-row"><input type="checkbox" checked=${d.notifications && perm === 'granted'} disabled=${perm === 'denied'} onChange=${(e) => toggle(e.target.checked)} /> ${t('notifEnable')}</label>
       ${perm === 'denied' && html`<p class="warn-text">${t('notifDenied')}</p>`}
       ${d.notifications && perm === 'granted' && html`<button class="btn small" onClick=${() => showSystemNotification(t('appName'), t('notifTestBody'), 'test')}>${t('notifTest')}</button>`}
@@ -106,7 +132,7 @@ function PairPanel() {
   const s = state.device.sync;
   const [link, setLink] = useState('');
   if (!link) {
-    makePairCode(s.token, s.passphrase).then((code) => setLink(pairLink(location.href, code)));
+    makePairCode(s.token, s.passphrase).then((code) => setLink(pairLink(isNative ? WEB_APP_URL : location.href, code)));
     return html`<p class="muted">…</p>`;
   }
   const qr = qrcode(0, 'L');
@@ -152,7 +178,7 @@ function PairJoin() {
   return html`<div class="pair notice">
     <h3>${t('pairJoinTitle')}</h3>
     ${state.pairCode ? html`<p>${t('pairReceived')}</p>` : html`
-      <p>${t('pairJoinIntro')}</p>
+      <p>${t(isNative ? 'pairJoinIntroApp' : 'pairJoinIntro')}</p>
       <div class="field"><label for="s-paircode">${t('pairPaste')}</label><input id="s-paircode" autocomplete="off" value=${text} onInput=${(e) => setText(e.target.value)} /></div>`}
     <div class="field"><label for="s-pairpass">${t('syncPass')}</label><input id="s-pairpass" type="password" autocomplete="current-password" value=${pass} onInput=${(e) => setPass(e.target.value)} /></div>
     <button class="btn primary" disabled=${busy || !code || !pass} onClick=${join}>${busy ? t('syncing') : t('pairJoin')}</button>
@@ -286,8 +312,8 @@ function Limits() {
     ${state.persisted === false && html`<p class="warn-text">${t('storageNotPersisted')}</p>`}
     <h3>${t('about')}</h3>
     <p class="muted">${t('version', { v: APP_VERSION })}</p>
-    <p class="hint">${t('installHelp')}</p>
-    ${inst.canPrompt && html`<button class="btn" onClick=${promptInstall}>${t('installBtn')}</button>`}
+    ${!isNative && html`<p class="hint">${t('installHelp')}</p>`}
+    ${!isNative && inst.canPrompt && html`<button class="btn" onClick=${promptInstall}>${t('installBtn')}</button>`}
   <//>`;
 }
 

@@ -1,0 +1,14 @@
+{
+  "appId": "io.github.kalenutikalab.myprojects",
+  "appName": "My Projects",
+  "webDir": "app",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_notify",
+      "iconColor": "#db2777"
+    }
+  }
+}

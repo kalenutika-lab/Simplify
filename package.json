@@ -1,6 +1,6 @@
 {
   "name": "personal-project-manager",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "private": true,
   "description": "Local-first personal project manager (installable web app).",
   "type": "module",
@@ -10,5 +10,11 @@
     "test:e2e": "node --test --test-concurrency=1 tests/e2e/*.test.js",
     "test:all": "npm test && npm run test:e2e"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/cli": "8.5.3",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/local-notifications": "8.3.1"
+  }
 }

@@ -39,6 +39,21 @@ If the site ever shows "404", check that **Settings > Pages > Build and deployme
 
 On a computer, Chrome and Edge show an install icon in the address bar. You can also use the app in a normal tab.
 
+## 3b. Android app: reminders that ring when the app is closed (free)
+
+The Android app is the same app, packaged so it can hand each reminder to the phone's own alarm system. Reminders then ring on time even when the app is closed or the phone was restarted. Nothing is sent to any server for this.
+
+1. On the phone, open https://github.com/kalenutika-lab/Simplify/releases/latest/download/my-projects.apk in Chrome (or tap **Download the Android app** in Settings > Reminders).
+2. Open the downloaded file. If Android asks, allow Chrome to "Install unknown apps", then tap **Install**.
+3. Open **My Projects** and allow notifications.
+4. Bring your tasks over with sync: in the web version open Settings > Sync > **Connect another device** > **Copy link**, then in the Android app open Settings > Sync, paste the link, type your passphrase and tap **Connect**.
+
+How it is built: `.github/workflows/android.yml` wraps `app/` with [Capacitor](https://capacitorjs.com) (MIT) and its Local Notifications plugin, builds the APK on GitHub Actions (free for public repositories) and attaches it to a GitHub Release. It is not in the Play Store, which charges a one-time fee.
+
+Good to know:
+- Reminders added on your computer are scheduled on the phone the next time the Android app opens and syncs.
+- Updates: install the newest APK from the same link. Until a private signing key is set up (repository secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`), each build may be signed with a different key, so Android may ask you to uninstall the old version first. Your tasks come back through sync.
+
 ## 4. Sync between phone and computer (optional, free)
 
 Sync uses a **secret GitHub Gist** on your own account. Before anything leaves your device, the app encrypts it with a passphrase only you know (AES-256). GitHub only ever stores unreadable data.

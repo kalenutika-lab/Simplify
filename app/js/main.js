@@ -12,6 +12,8 @@ import { Settings } from './ui/settings.js';
 import { initPlatform, onUpdateReady, applyUpdate, showSystemNotification } from './platform.js';
 import { fmtStamp } from './ui/common.js';
 import { extractPairCode } from './core/pair.js';
+import { formatDMY } from './core/dates.js';
+import { isNative, initNative, rescheduleAll, notificationPermission, requestNotificationPermission } from './native.js';
 
 const icon = (d) => html`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d.map((x) => html`<path d=${x} />`)}</svg>`;
 const TABS = [
@@ -108,14 +110,33 @@ function App() {
 
 onError((e) => toast(t('saveFailed', { msg: (e && e.message) || String(e) }), { kind: 'error', timeout: 10000 }));
 setNotifier((d) => {
-  if (state.device.notifications) showSystemNotification(t('reminderTitle'), d.task.title, `${d.task.id}:${d.reminder.id}`, d.task.id);
+  // In the Android app the phone's alarm system already shows the notification.
+  if (!isNative && state.device.notifications) showSystemNotification(t('reminderTitle'), d.task.title, `${d.task.id}:${d.reminder.id}`, d.task.id);
 });
 
 render(html`<${App} />`, document.getElementById('root'));
-initPlatform({ onOpenTask: (id) => openEditor(id) });
+if (!isNative) initPlatform({ onOpenTask: (id) => openEditor(id) });
 
-init().then(() => {
+// Android app: keep the phone's scheduled reminders in step with the tasks.
+const reminderText = (x) => ({
+  title: x.title,
+  body: x.dueDate ? t('notifDue', { date: formatDMY(x.dueDate), time: x.dueTime || '' }).trim() : t('reminderTitle'),
+});
+let rescheduleTimer = null;
+function scheduleReminders() {
+  clearTimeout(rescheduleTimer);
+  rescheduleTimer = setTimeout(() => rescheduleAll(state.tasks, reminderText), 1000);
+}
+
+init().then(async () => {
   applyTheme();
+  if (isNative) {
+    await initNative({ onOpenTask: (id) => openEditor(id), channelName: t('channelName') }).catch(() => {});
+    // First launch: ask once for permission to show reminders.
+    if ((await notificationPermission().catch(() => 'denied')) === 'prompt') await requestNotificationPermission().catch(() => {});
+    subscribe(scheduleReminders);
+    scheduleReminders();
+  }
   checkReminders();
   setInterval(() => checkReminders(), 30000);
   document.addEventListener('visibilitychange', () => {
