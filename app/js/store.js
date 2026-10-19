@@ -79,6 +79,15 @@ export async function init() {
     state.prefs = prefs ? validatePrefs(prefs, defaultPrefs()) : defaultPrefs();
     state.tasks = await db.getAll('tasks');
     state.projects = await db.getAll('projects');
+    // v1.3: the bright light look is the default, even when the phone is in dark mode.
+    // Switch once from "follow system" to light; a later choice in Settings is kept.
+    if (!(await db.getKV('lightDefault'))) {
+      if (state.device.theme === 'system') {
+        state.device.theme = 'light';
+        await db.setKV('device', state.device);
+      }
+      await db.setKV('lightDefault', true);
+    }
     if (!(await db.getKV('seeded'))) {
       const seeds = seedProjects(state.device.lang);
       const have = new Set(state.projects.map((p) => p.id));

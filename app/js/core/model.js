@@ -53,7 +53,7 @@ export function defaultPrefs() {
 export function defaultDevice(lang) {
   return {
     lang: lang === 'fr' ? 'fr' : 'en',
-    theme: 'system',
+    theme: 'light',
     notifications: false,
     sync: { enabled: false, token: '', passphrase: '', gistId: '', lastSync: null, lastError: null },
   };
