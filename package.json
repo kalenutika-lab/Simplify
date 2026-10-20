@@ -1,6 +1,6 @@
 {
   "name": "personal-project-manager",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
   "description": "Local-first personal project manager (installable web app).",
   "type": "module",
@@ -13,6 +13,7 @@
   "license": "MIT",
   "devDependencies": {
     "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
     "@capacitor/cli": "8.5.3",
     "@capacitor/core": "8.5.3",
     "@capacitor/local-notifications": "8.3.1"

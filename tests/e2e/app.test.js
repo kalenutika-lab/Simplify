@@ -364,10 +364,15 @@ test('sync pairing: second device joins with a code and the passphrase only', as
   const link = await pc.page.inputValue('.pair-link');
   assert.ok(!link.includes('test-token-123'), 'token is not readable in the link');
 
-  const phone = await openApp(env, { time: null });
+  const phone = await openApp(env, { time: null, userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36' });
   await phone.context.route('https://api.github.com/**', fakeGitHub);
   await phone.page.goto(link.replace(/^https?:\/\/[^/]+\//, env.url));
   await phone.page.waitForSelector('#s-pairpass');
+  // On Android Chrome the code can be handed to the installed app instead.
+  const openInApp = await phone.page.getAttribute('a:has-text("Open in the My Projects app")', 'href');
+  const code = new URL(link).hash.slice('#pair='.length);
+  assert.ok(openInApp.startsWith(`intent://open?pair=${code}#Intent;scheme=io.github.kalenutikalab.myprojects;package=io.github.kalenutikalab.myprojects;`), openInApp);
+  assert.ok(openInApp.includes('S.browser_fallback_url=https%3A%2F%2Fgithub.com%2F'));
   assert.equal(new URL(phone.page.url()).hash, '#settings');
   await phone.page.fill('#s-pairpass', 'wrong phrase!');
   await phone.page.click('button:has-text("Connect")');

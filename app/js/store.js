@@ -305,6 +305,11 @@ export async function setPrefs(patch) {
   if (await persist(() => db.setKV('prefs', state.prefs))) scheduleSync();
 }
 
+export function setPairCode(code) {
+  state.pairCode = code;
+  emit();
+}
+
 /** Turn on sync on this device from another device's pairing code and the shared passphrase. */
 export async function connectWithPairCode(code, passphrase) {
   const token = await readPairCode(code, passphrase);

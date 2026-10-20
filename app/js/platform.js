@@ -1,5 +1,5 @@
 // Browser integration: service worker (offline + updates), install prompt, notifications.
-export const APP_VERSION = '1.5.0';
+export const APP_VERSION = '1.5.1';
 // The Android app, built by GitHub Actions and attached to the latest release of the repository.
 // The public web version, used for pairing links made inside the Android app.
 export const WEB_APP_URL = 'https://kalenutika-lab.github.io/Simplify/';

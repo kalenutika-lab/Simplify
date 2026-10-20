@@ -24,8 +24,8 @@ export async function teardown({ server, browser }) {
 }
 
 /** New isolated profile. `time` fixes the clock (local time in `timezoneId`). */
-export async function openApp(env, { width = 390, height = 844, timezoneId = 'Europe/Paris', time = '2026-10-17T10:00:00', locale = 'en-GB' } = {}) {
-  const context = await env.browser.newContext({ viewport: { width, height }, timezoneId, locale, acceptDownloads: true });
+export async function openApp(env, { width = 390, height = 844, timezoneId = 'Europe/Paris', time = '2026-10-17T10:00:00', locale = 'en-GB', userAgent } = {}) {
+  const context = await env.browser.newContext({ viewport: { width, height }, timezoneId, locale, acceptDownloads: true, ...(userAgent && { userAgent }) });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));

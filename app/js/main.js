@@ -1,7 +1,7 @@
 // App shell: tabs, reminders loop, toasts and dialogs.
 import { html, render, useState, useEffect } from './vendor/htm-preact.js';
 import { t } from './i18n.js';
-import { state, subscribe, init, checkReminders, dismissToast, toast, onError, setNotifier, snoozeReminder, dismissAlert, findTask, setDone, syncNow } from './store.js';
+import { state, setPairCode, subscribe, init, checkReminders, dismissToast, toast, onError, setNotifier, snoozeReminder, dismissAlert, findTask, setDone, syncNow } from './store.js';
 import { DialogHost } from './ui/common.js';
 import { EditorHost, openEditor } from './ui/editor.js';
 import { Home } from './ui/home.js';
@@ -13,7 +13,7 @@ import { initPlatform, onUpdateReady, applyUpdate, showSystemNotification } from
 import { fmtStamp } from './ui/common.js';
 import { extractPairCode } from './core/pair.js';
 import { formatDMY } from './core/dates.js';
-import { isNative, initNative, rescheduleAll, notificationPermission, requestNotificationPermission } from './native.js';
+import { isNative, initNative, onAppLink, rescheduleAll, notificationPermission, requestNotificationPermission } from './native.js';
 
 const icon = (d) => html`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d.map((x) => html`<path d=${x} />`)}</svg>`;
 const TABS = [
@@ -136,6 +136,13 @@ init().then(async () => {
     if ((await notificationPermission().catch(() => 'denied')) === 'prompt') await requestNotificationPermission().catch(() => {});
     subscribe(scheduleReminders);
     scheduleReminders();
+    // A pairing link tapped in Chrome ("Open in the app") lands here.
+    onAppLink((url) => {
+      const code = extractPairCode(url);
+      if (!code || state.device.sync.enabled) return;
+      setPairCode(code);
+      location.hash = '#settings';
+    }).catch(() => {});
   }
   checkReminders();
   setInterval(() => checkReminders(), 30000);

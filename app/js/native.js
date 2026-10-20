@@ -14,6 +14,16 @@ async function plugin() {
   return ln;
 }
 
+/** Calls `onUrl` with the link that opened the app (at launch and while running). */
+export async function onAppLink(onUrl) {
+  if (!isNative) return;
+  const { registerPlugin } = await import('./vendor/capacitor-core.js');
+  const app = registerPlugin('App');
+  await app.addListener('appUrlOpen', (e) => e && e.url && onUrl(e.url));
+  const launch = await app.getLaunchUrl().catch(() => null);
+  if (launch && launch.url) onUrl(launch.url);
+}
+
 export async function initNative({ onOpenTask, channelName }) {
   if (!isNative) return;
   const p = await plugin();

@@ -157,6 +157,10 @@ function PairPanel() {
   </div>`;
 }
 
+// Opens the installed Android app with the code (Chrome intent link); without the app, offers the download.
+const APP_SCHEME = 'io.github.kalenutikalab.myprojects';
+const appIntentUrl = (code) => `intent://open?pair=${code}#Intent;scheme=${APP_SCHEME};package=${APP_SCHEME};S.browser_fallback_url=${encodeURIComponent(ANDROID_APK_URL)};end`;
+
 /** On the second device: finish setup with a code from the first device and the passphrase. */
 function PairJoin() {
   const [text, setText] = useState('');
@@ -177,6 +181,10 @@ function PairJoin() {
   }
   return html`<div class="pair notice">
     <h3>${t('pairJoinTitle')}</h3>
+    ${state.pairCode && !isNative && /Android/i.test(navigator.userAgent) && html`
+      <p>${t('pairOpenAppIntro')}</p>
+      <a class="btn primary" href=${appIntentUrl(state.pairCode)}>${t('pairOpenApp')}</a>
+      <p class="hint">${t('pairOrHere')}</p>`}
     ${state.pairCode ? html`<p>${t('pairReceived')}</p>` : html`
       <p>${t(isNative ? 'pairJoinIntroApp' : 'pairJoinIntro')}</p>
       <div class="field"><label for="s-paircode">${t('pairPaste')}</label><input id="s-paircode" autocomplete="off" value=${text} onInput=${(e) => setText(e.target.value)} /></div>`}
